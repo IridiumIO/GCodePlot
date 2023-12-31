@@ -702,38 +702,23 @@ def parse_svg_file(data):
     except:
         return None
 
-def remove_hidden_SVGElements(svgTree):
-
+def remove_hidden_locked_SVGElements(svgTree, ignoreHidden=True, ignoreLocked=True):
     prop_parents = svgTree.findall('*' + '/..')
     for parent in prop_parents:
         for prop in parent.findall('*'):
-            type = prop.get('style', None)
-            if 'display:none' in str(type):
+            style = prop.get('style', None) #Hidden Elements
+            type = prop.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}insensitive', None) # Locked Elements
+            
+            if ( ignoreHidden and 'display:none' in str(style)) or (ignoreLocked and type is not None):
                 parent.remove(prop)
             else:
-                remove_hidden_SVGElements(prop)
-
-
-def remove_locked_InkscapeSVGElements(svgTree:ET.Element):
-
-    prop_parents = svgTree.findall('*' + '/..')
-    for parent in prop_parents:
-        for prop in parent.findall('*'):
-
-            type = prop.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}insensitive', None)
-        
-            if type is not None:
-                parent.remove(prop)     
-            else:
-                remove_locked_InkscapeSVGElements(prop)
-
+                remove_hidden_locked_SVGElements(prop)
 
 def generate_pen_data(svgTree, data, args, shader:Shader):
     penData = {}
     
     if svgTree is not None:
-        if args.ignore_hidden: remove_hidden_SVGElements(svgTree)
-        if args.ignore_locked: remove_locked_InkscapeSVGElements(svgTree)
+        remove_hidden_locked_SVGElements(svgTree, ignoreHidden=args.ignore_hidden, ignoreLocked=args.ignore_locked)
         penData = parseSVG(svgTree, tolerance=args.tolerance, shader=shader, strokeAll=args.stroke_all, pens=args.pens, extractColor=args.extract_color if args.boolean_extract_color else None)
     else:
         penData = parseHPGL(data, dpi=args.input_dpi)
