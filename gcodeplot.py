@@ -702,12 +702,23 @@ def parse_svg_file(data):
     except:
         return None
 
+def remove_hidden_SVGElements(svgTree):
+
+    prop_parents = svgTree.findall('*' + '/..')
+    for parent in prop_parents:
+        for prop in parent.findall('*'):
+            type = prop.get('style', None)
+            if 'display:none' in str(type):
+                parent.remove(prop)
+            else:
+                remove_hidden_SVGElements(prop)
 
 
 def generate_pen_data(svgTree, data, args, shader:Shader):
     penData = {}
     
     if svgTree is not None:
+        remove_hidden_SVGElements(svgTree) if args.ignore_hidden else svgTree
         penData = parseSVG(svgTree, tolerance=args.tolerance, shader=shader, strokeAll=args.stroke_all, pens=args.pens, extractColor=args.extract_color if args.boolean_extract_color else None)
     else:
         penData = parseHPGL(data, dpi=args.input_dpi)
@@ -805,6 +816,7 @@ def parse_arguments(argparser:cArgumentParser):
     argparser.add_argument('-R', '--extract-color', metavar='C', default=None, type=parser.rgbFromColor, help='extract color (specified in SVG format , e.g., rgb(1,0,0) or #ff0000 or red)')
     argparser.add_argument('-L', '--stroke-all', action=argparse.BooleanOptionalAction, default=False, help='stroke even regions specified by SVG to have no stroke')
     argparser.add_argument('-e', '--direction', metavar='ANGLE', default=None, type=lambda value: None if value.lower() == 'none' else float(value), help='for slanted pens: prefer to draw in given direction (degrees; 0=positive x, 90=positive y, none=no preferred direction) [default none]')
+    argparser.add_argument('--ignore-hidden', action=argparse.BooleanOptionalAction, default=True, help='ignore hidden SVG elements')
     
     argparser.add_argument('-o', '--optimization-time', metavar='T', default=60, type=int, help='max time to spend optimizing (seconds; set to 0 to turn off optimization) [default 60]')
     argparser.add_argument('-d', '--sort', action=argparse.BooleanOptionalAction, default=False, help='sort paths from inside to outside for cutting [default off]')
