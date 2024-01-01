@@ -816,8 +816,8 @@ def parse_arguments(argparser:cArgumentParser):
     argparser.add_argument('-R', '--extract-color', metavar='C', default=None, type=parser.rgbFromColor, help='extract color (specified in SVG format , e.g., rgb(1,0,0) or #ff0000 or red)')
     argparser.add_argument('-L', '--stroke-all', action=argparse.BooleanOptionalAction, default=False, help='stroke even regions specified by SVG to have no stroke')
     argparser.add_argument('-e', '--direction', metavar='ANGLE', default=None, type=lambda value: None if value.lower() == 'none' else float(value), help='for slanted pens: prefer to draw in given direction (degrees; 0=positive x, 90=positive y, none=no preferred direction) [default none]')
-    argparser.add_argument('--ignore-hidden', action=argparse.BooleanOptionalAction, default=True, help='ignore hidden SVG elements')
-    argparser.add_argument('--ignore-locked', action=argparse.BooleanOptionalAction, default=True, help='ignore locked SVG elements (for Inkscape SVG only)')
+    argparser.add_argument('--ignore-hidden', action=CustomBooleanAction, default=True, help='ignore hidden SVG elements')
+    argparser.add_argument('--ignore-locked', action=CustomBooleanAction, default=True, help='ignore locked SVG elements (for Inkscape SVG only)')
     
     
     argparser.add_argument('-o', '--optimization-time', metavar='T', default=60, type=int, help='max time to spend optimizing (seconds; set to 0 to turn off optimization) [default 60]')
