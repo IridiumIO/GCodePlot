@@ -2,3 +2,7 @@
 *.pyc
 /test
 gcodeplot_orig.py
+/build
+/dist
+gcodeplot.exe
+gcodeplot.spec

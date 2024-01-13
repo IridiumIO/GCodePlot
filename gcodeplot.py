@@ -712,7 +712,7 @@ def remove_hidden_locked_SVGElements(svgTree, ignoreHidden=True, ignoreLocked=Tr
             if ( ignoreHidden and 'display:none' in str(style)) or (ignoreLocked and type is not None):
                 parent.remove(prop)
             else:
-                remove_hidden_locked_SVGElements(prop)
+                remove_hidden_locked_SVGElements(prop, ignoreHidden, ignoreLocked)
 
 def generate_pen_data(svgTree, data, args, shader:Shader):
     penData = {}
