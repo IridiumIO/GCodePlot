@@ -702,14 +702,14 @@ def parse_svg_file(data):
     except:
         return None
 
-def remove_hidden_locked_SVGElements(svgTree, ignoreHidden=True, ignoreLocked=True):
+def remove_hidden_locked_SVGElements(svgTree: ET.Element, ignoreHidden=True, ignoreLocked=True):
     prop_parents = svgTree.findall('*' + '/..')
     for parent in prop_parents:
         for prop in parent.findall('*'):
             style = prop.get('style', None) #Hidden Elements
             type = prop.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}insensitive', None) # Locked Elements
-            
-            if ( ignoreHidden and 'display:none' in str(style)) or (ignoreLocked and type is not None):
+            attr_hidden = prop.get('display', None)
+            if ( ignoreHidden and ('display:none' in str(style) or attr_hidden == 'none')) or (ignoreLocked and type is not None):
                 parent.remove(prop)
             else:
                 remove_hidden_locked_SVGElements(prop, ignoreHidden, ignoreLocked)
