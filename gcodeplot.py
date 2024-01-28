@@ -702,17 +702,17 @@ def parse_svg_file(data):
     except:
         return None
 
-def remove_hidden_locked_SVGElements(svgTree, ignoreHidden=True, ignoreLocked=True):
+def remove_hidden_locked_SVGElements(svgTree: ET.Element, ignoreHidden=True, ignoreLocked=True):
     prop_parents = svgTree.findall('*' + '/..')
     for parent in prop_parents:
         for prop in parent.findall('*'):
             style = prop.get('style', None) #Hidden Elements
             type = prop.get('{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}insensitive', None) # Locked Elements
-            
-            if ( ignoreHidden and 'display:none' in str(style)) or (ignoreLocked and type is not None):
+            attr_hidden = prop.get('display', None)
+            if ( ignoreHidden and ('display:none' in str(style) or attr_hidden == 'none')) or (ignoreLocked and type is not None):
                 parent.remove(prop)
             else:
-                remove_hidden_locked_SVGElements(prop)
+                remove_hidden_locked_SVGElements(prop, ignoreHidden, ignoreLocked)
 
 def generate_pen_data(svgTree, data, args, shader:Shader):
     penData = {}
@@ -810,7 +810,7 @@ def parse_arguments(argparser:cArgumentParser):
     argparser.add_argument('-m', '--shading-lightest', metavar='X', default=3.0, type=float, help='shading spacing for lightest colors (millimeters) [default 3.0]')
     argparser.add_argument('-M', '--shading-darkest', metavar='X', default=0.5, type=float, help='shading spacing for darkest color (millimeters) [default 0.5]')
     argparser.add_argument('-A', '--shading-angle', metavar='X', default=45, type=float, help='shading angle (degrees) [default 45]')
-    argparser.add_argument('-X', '--shading-crosshatch', action=argparse.BooleanOptionalAction, default=False, help='cross hatch shading')
+    argparser.add_argument('-X', '--shading-crosshatch', action=CustomBooleanAction, default=False, help='cross hatch shading')
     argparser.add_argument('-O', '--shading-avoid-outline', action=argparse.BooleanOptionalAction, default=False, help='avoid going over outline twice when shading') #?Unused
     
     argparser.add_argument('-R', '--extract-color', metavar='C', default=None, type=parser.rgbFromColor, help='extract color (specified in SVG format , e.g., rgb(1,0,0) or #ff0000 or red)')
@@ -838,7 +838,7 @@ def parse_arguments(argparser:cArgumentParser):
     
     #Inkscape specific boolean parameters
     argparser.add_argument('--boolean-extract-color', metavar='TRUE/FALSE', type=lambda val: True if val.lower() == 'true' else False, help=argparse.SUPPRESS)
-    argparser.add_argument('--boolean-shading-crosshatch', metavar='TRUE/FALSE', dest='shading_crosshatch',  help=argparse.SUPPRESS)
+    argparser.add_argument('--boolean-shading-crosshatch', metavar='TRUE/FALSE', dest='shading_crosshatch',  help=argparse.SUPPRESS, action=CustomBooleanAction)
     argparser.add_argument('--boolean-sort', metavar='TRUE/FALSE', dest='sort',  help=argparse.SUPPRESS)
     argparser.add_argument('--send-and-save', metavar='PORT', default=False, help=argparse.SUPPRESS) #Could probably roll this into "send" and check if we're in Inkscape at the end of __main__ by using tab/quiet instead
     argparser.add_argument('--tab', dest='quiet', default=False, type=bool, help=argparse.SUPPRESS)
