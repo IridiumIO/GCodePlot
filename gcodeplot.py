@@ -850,9 +850,12 @@ def parse_arguments(argparser:cArgumentParser):
     # If a port is provided on send_and_save, then it sets SEND to the port, then sets itself to True. 
     args.send = args.send if str(args.send).isdigit() else args.send_and_save if str(args.send_and_save).isdigit() else None
     args.send_and_save = True if str(args.send_and_save).isdigit() else False
-    
-    args.optimization_time = 0 if args.sort else args.optimization_time
-    args.sort  = False if args.optimization_time > 0 else args.sort 
+ 
+    if args.sort == True:
+        args.optimization_time = 0 
+    elif args.optimization_time > 0:
+        args.sort = False
+ 
     
     if args.tool_mode == 'cut':
         args.optimization_time = 0
